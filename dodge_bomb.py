@@ -94,7 +94,7 @@ def main():
                 return
         screen.blit(bg_img, [0, 0])
 
-        if kk_rct.colliderect(bb_rct): #  issue1の修正
+        if kk_rct.colliderect(bb_rct): #  issue1 真理値の無駄遣いを修正
             gameover(screen)
             return
 
