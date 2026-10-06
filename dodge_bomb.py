@@ -1,7 +1,7 @@
 import os
-import sys
 import pygame as pg
 import random
+import sys
 import time
 
 
@@ -30,6 +30,11 @@ def check_bound(rect: pg.Rect) -> tuple[bool, bool]:
 
 
 def gameover(screen: pg.Surface) -> None:
+    """
+    引数:スクリーンサーフェース
+    戻り値:なし
+    ゲームオーバー画面出力関数
+    """
     bo_img = pg.Surface((1100, 650)) #  ブラックアウト画面
     pg.draw.rect(bo_img, (0, 0, 0), pg.Rect(0, 0, 1100, 650))
     bo_img.set_alpha(200)
@@ -42,6 +47,28 @@ def gameover(screen: pg.Surface) -> None:
     screen.blit(kk_crying_img, [800, 300])
     pg.display.update()
     time.sleep(5)
+
+
+def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
+    """
+    引数:なし
+    戻り値:移動タプルに対応する画像Surface
+    飛ぶ方向でこうかとんの画像が変わる
+    """
+    kk_img = pg.image.load("fig/3.png")
+    kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    kk_dict = {
+        (0, 0): pg.transform.rotozoom(kk_img, 0, 1.0),
+        (5, 0): pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), 0, 1.0),
+        (5, -5): pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), 45, 1.0),
+        (0, -5): pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), 90, 1.0),
+        (-5, -5): pg.transform.rotozoom(kk_img, -45, 1.0),
+        (-5, 0): pg.transform.rotozoom(kk_img, 0, 1.0),
+        (-5, 5): pg.transform.rotozoom(kk_img, 45, 1.0),
+        (0, 5): pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), -90, 1.0),
+        (5, 5): pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), -45, 1.0),
+    }
+    return kk_dict
 
 
 def main():
@@ -58,6 +85,7 @@ def main():
     bb_rct.centerx = random.randint(0, WIDTH)
     bb_rct.centery = random.randint(0, HEIGHT)
     vx, vy = 5, -5
+    kk_imgs = get_kk_imgs()  
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -66,7 +94,7 @@ def main():
                 return
         screen.blit(bg_img, [0, 0])
 
-        if kk_rct.colliderect(bb_rct) == True:
+        if kk_rct.colliderect(bb_rct): #  issue1の修正
             gameover(screen)
             return
 
@@ -79,6 +107,7 @@ def main():
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
+        kk_img = kk_imgs[tuple(sum_mv)]  
         screen.blit(kk_img, kk_rct)
 
         bb_rct.move_ip(vx, vy)
